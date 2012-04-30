@@ -43,11 +43,22 @@ int
 map_search(struct map * m, int fd) {
 	int hash = fd & (m->size-1);
 	struct node * n = &m->hash[hash];
-	do {
-		if (n->fd == fd)
-			return n->id;
-		n = n->next;
-	} while(n);
+
+    if (n->fd < 0)
+    {
+        return -1;
+    }
+
+    int old_hash = n->fd & (m->size-1);
+    if (old_hash == hash)
+    {
+        do {
+            if (n->fd == fd)
+                return n->id;
+            n = n->next;
+        } while(n);
+    }
+
 	return -1;
 }
 
@@ -134,6 +145,6 @@ map_dump(struct map *m) {
 	int i;
 	for (i=0;i<m->size;i++) {
 		struct node * n = &(m->hash[i]);
-		printf("[%d] fd = %d , id = %d , next = %ld\n",i,n->fd,n->id,(n->next - m->hash));
+		printf("[%d] fd = %d , id = %d , next = %d\n",i,n->fd,n->id, n->next==NULL?-1:(n->next - m->hash));
 	}
 }
