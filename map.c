@@ -71,6 +71,7 @@ map_insert(struct map * m, int fd, int id) {
 		n->id = id;
 		return;
 	}
+
 	int ohash = n->fd & (m->size-1);
 	if (hash != ohash) {
 		struct node * last = &m->hash[ohash];
@@ -87,6 +88,19 @@ map_insert(struct map * m, int fd, int id) {
 		map_insert(m,ofd, oid);
 		return;
 	}
+
+    {
+        // cover old value
+        struct node *iter_n = n;
+        for (; iter_n!=NULL; iter_n=iter_n->next)
+        {
+            if (iter_n->fd == fd)
+            {
+                iter_n->id = id;
+                return;
+            }
+        }
+    }
 
 	int last = (n - m->hash) * 2;
 	int i;
